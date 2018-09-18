@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {FormValueString, FormValueBoolean, handleFormInput, handleFormCheckbox, required, numeric, min, max, composeValidators, propsInputValidateOnBlur, validateFormValue, shouldComponentUpdateFormValue} from './validators';
+import {FormValueString, FormValueBoolean, handleFormInput, handleFormCheckbox, required, numeric, min, max, composeValidators, propsInputValidateOnBlur, validateFormValue} from './validators';
 import {IComboBoxValue, IState, ISelectionData, IColumnSelection} from './types';
 import { connect } from 'react-redux';
 import {RouteComponentProps} from "react-router";

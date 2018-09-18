@@ -19,15 +19,15 @@ export const max: IParamterizedCurriedValidator = (maxValue: number) => (message
 export const composeValidators = (...validators: IValidator[]) : IValidator => (value:string) =>
   validators.reduce((error: string, validator: IValidator) => error || validator(value), undefined);
 
-abstract class AbstractFormValue<T> {
-    constructor(public value: T,  public error: string, public touched: boolean) {
-    }
-    get invalid() { return this.touched && this.error;}
-}
-
 /* Simple helpers to simplify form handling. It uses a mutable form state, which might be considered bad practice by some,
  * since it prevents the usage of PureComponent and thus might make rendering less efficient.
  */
+
+abstract class AbstractFormValue<T> {
+    constructor(public value: T,  public error: string, public touched: boolean) {
+    }
+    get invalid() { return this.touched && this.error === undefined;}
+}
 
 export class FormValueString extends AbstractFormValue<string> {
     constructor(value: string = '',  error: string = undefined, touched: boolean = false) {
@@ -65,10 +65,4 @@ export const propsInputValidateOnBlur = (handle: ReturnType<typeof handleFormInp
 
 export const validateFormValue = (formValue: FormValueString, validator: IValidator) => {
     formValue.error = validator(formValue.value);
-}
-
-export const shouldComponentUpdateFormValue = (oldFormValue: AbstractFormValue<any>, newFormValue: AbstractFormValue<any>) => {
-    return oldFormValue.value != newFormValue.value ||
-            oldFormValue.error != newFormValue.error ||
-            oldFormValue.touched != newFormValue.touched;
 }
