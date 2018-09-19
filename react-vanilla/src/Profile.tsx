@@ -79,10 +79,10 @@ class EMailPureComponent extends React.Component<any> {
 
         return (<div className="form-group">
             <label htmlFor="email">E-mail</label>
-            <input type="text" className={(email.error && email.touched ? 'is-invalid' : '') + ' form-control'}
+            <input type="text" className={(email.invalid && email.touched ? 'is-invalid' : '') + ' form-control'}
                 value={email.value} onChange={this.props.handleEvents(email, false)} onBlur={this.props.handleEvents(email, true, true)}
                 name="email" placeholder="Enter e-mail" disabled={this.props.readonly}/>
-            {email.error && <div className="invalid-feedback">{email.error}</div>}
+            {email.invalid && <div className="invalid-feedback">{email.error}</div>}
         </div>);
     }
 }

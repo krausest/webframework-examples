@@ -26,7 +26,7 @@ export const composeValidators = (...validators: IValidator[]) : IValidator => (
 abstract class AbstractFormValue<T> {
     constructor(public value: T,  public error: string, public touched: boolean) {
     }
-    get invalid() { return this.touched && this.error === undefined;}
+    get invalid() { return this.touched && this.error !== undefined;}
 }
 
 export class FormValueString extends AbstractFormValue<string> {
