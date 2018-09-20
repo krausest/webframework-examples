@@ -1,4 +1,4 @@
-import {IComboBoxValue, IProfileData, ISelectionData, IState} from './types';
+import {IComboBoxValue, IProfileData, ISelectionData, IState, Sex} from './types';
 import { combineReducers } from 'redux';
 import * as actions from './actions';
 
@@ -9,6 +9,7 @@ interface IAction {
 const initialProfileState : IProfileData = {
     name: '',
     email: '',
+    sex: Sex.FEMALE,
     allowPhone: true,
     phone: '',
     password: ''

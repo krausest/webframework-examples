@@ -41,20 +41,24 @@ export class FormValueBoolean extends AbstractFormValue<boolean> {
     }
 }
 
-export const handleFormInput = (that: any, formKey: string, validate: (a: any) => void) => (formValue: FormValueString, doUpdateTouch: boolean = true, doValidate: boolean = false) => (evt: React.ChangeEvent<HTMLInputElement|HTMLSelectElement>) => {
-    let value = evt.target.value;
-    formValue.value = value;
-    if (doUpdateTouch) formValue.touched = true;
-    if (doValidate) validate(that.state[formKey]);
-    that.setState({[formKey]: that.state[formKey]});
+export function handleFormInput<P,S, K extends keyof S>(that: React.Component<P,S>, formKey: K, validate: (a: S[K]) => void) {
+    return  (formValue: FormValueString, doUpdateTouch: boolean = true, doValidate: boolean = false) => (evt: React.ChangeEvent<HTMLInputElement|HTMLSelectElement>) => {
+        let value = evt.target.value;
+        formValue.value = value;
+        if (doUpdateTouch) formValue.touched = true;
+        if (doValidate) validate(that.state[formKey]);
+        that.setState(that.state);
+    }
 }
 
-export const handleFormCheckbox = (that: any, formKey: string, validate: (a: any) => void) => (formValue: FormValueBoolean, doUpdateTouch: boolean = true, doValidate: boolean = false) => (evt: React.ChangeEvent<HTMLInputElement>) => {
-    let value = evt.target.checked;
-    formValue.value = value;
-    if (doUpdateTouch) formValue.touched = true;
-    if (doValidate) validate(that.state[formKey]);
-    that.setState({[formKey]: that.state[formKey]});
+export function handleFormCheckbox<P,S, K extends keyof S>(that: React.Component<P,S>, formKey: K, validate: (a: S[K]) => void) {
+    return (formValue: FormValueBoolean, doUpdateTouch: boolean = true, doValidate: boolean = false) => (evt: React.ChangeEvent<HTMLInputElement>) => {
+        let value = evt.target.checked;
+        formValue.value = value;
+        if (doUpdateTouch) formValue.touched = true;
+        if (doValidate) validate(that.state[formKey]);
+        that.setState(that.state);
+    }
 }
 
 export const propsInputValidateOnBlur = (handle: ReturnType<typeof handleFormInput>) => (value: FormValueString) =>

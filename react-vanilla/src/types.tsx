@@ -6,8 +6,14 @@ export interface IComboBoxValue {
     step: number
 };
 
+export enum Sex {
+    MALE,
+    FEMALE
+}
+
 export interface IProfileData {
     name: string;
+    sex: Sex;
     email: string;
     allowPhone: boolean;
     phone: string;
