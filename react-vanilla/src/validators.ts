@@ -24,47 +24,54 @@ export const composeValidators = (...validators: IValidator[]) : IValidator => (
  */
 
 abstract class AbstractFormValue<T> {
-    constructor(public value: T,  public error: string, public touched: boolean) {
+    constructor(public value: T,  public error: string|undefined, public touched: boolean) {
     }
     get invalid() { return this.touched && this.error !== undefined;}
 }
 
 export class FormValueString extends AbstractFormValue<string> {
-    constructor(value: string = '',  error: string = undefined, touched: boolean = false) {
+    constructor(value: string = '',  error?: string, touched: boolean = false) {
         super(value, error, touched);
     }
 }
 
 export class FormValueBoolean extends AbstractFormValue<boolean> {
-    constructor(value: boolean = false,  error: string = undefined,  touched: boolean = false) {
+    constructor(value: boolean = false,  error?: string,  touched: boolean = false) {
         super(value, error, touched);
     }
 }
 
+function handleValue<P,S, K extends keyof S, T>(that: React.Component<P,S>, formKey: K, validate: (a: S[K]) => void,
+        formValue: AbstractFormValue<T>, value: T, doUpdateTouch: boolean, doValidate: boolean) {
+    formValue.value = value;
+    if (doUpdateTouch) { formValue.touched = true; }
+    if (doValidate) { validate(that.state[formKey]); }
+    that.setState(that.state);
+}
+
 export function handleFormInput<P,S, K extends keyof S>(that: React.Component<P,S>, formKey: K, validate: (a: S[K]) => void) {
-    return  (formValue: FormValueString, doUpdateTouch: boolean = true, doValidate: boolean = false) => (evt: React.ChangeEvent<HTMLInputElement|HTMLSelectElement>) => {
-        let value = evt.target.value;
-        formValue.value = value;
-        if (doUpdateTouch) formValue.touched = true;
-        if (doValidate) validate(that.state[formKey]);
-        that.setState(that.state);
+    return  (formValue: FormValueString, doUpdateTouch: boolean, doValidate: boolean) => (evt: React.ChangeEvent<HTMLInputElement|HTMLSelectElement>) => {
+        handleValue(that, formKey, validate, formValue, evt.target.value, doUpdateTouch, doValidate);
     }
 }
 
 export function handleFormCheckbox<P,S, K extends keyof S>(that: React.Component<P,S>, formKey: K, validate: (a: S[K]) => void) {
-    return (formValue: FormValueBoolean, doUpdateTouch: boolean = true, doValidate: boolean = false) => (evt: React.ChangeEvent<HTMLInputElement>) => {
-        let value = evt.target.checked;
-        formValue.value = value;
-        if (doUpdateTouch) formValue.touched = true;
-        if (doValidate) validate(that.state[formKey]);
-        that.setState(that.state);
+    return (formValue: FormValueBoolean, doUpdateTouch: boolean, doValidate: boolean) => (evt: React.ChangeEvent<HTMLInputElement>) => {
+        handleValue(that, formKey, validate, formValue, evt.target.checked, doUpdateTouch, doValidate);
     }
 }
 
+export type THandleForm = (formValue: AbstractFormValue<any>, doUpdateTouch: boolean, doValidate: boolean) => (evt: React.ChangeEvent<any>) => void;
+
 export const propsInputValidateOnBlur = (handle: ReturnType<typeof handleFormInput>) => (value: FormValueString) =>
     ({value: value.value,
-    onChange: handle(value, false),
+    onChange: handle(value, false, false),
     onBlur: handle(value, true, true)
+})
+
+export const propsInputValidateOnChange = (handle: ReturnType<typeof handleFormInput>) => (value: FormValueString) =>
+    ({value: value.value,
+    onChange: handle(value, true, true)
 })
 
 export const validateFormValue = (formValue: FormValueString, validator: IValidator) => {

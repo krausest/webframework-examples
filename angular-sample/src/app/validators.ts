@@ -102,3 +102,21 @@ export function myMax(maxValue: number): ValidatorFn {
     }
   }
 
+@Directive({
+    selector: '[checkPassword]',
+    providers: [{provide: NG_VALIDATORS, useExisting: CheckPasswordValidatorDirective, multi: true}]
+  })
+  export class CheckPasswordValidatorDirective implements Validator {
+
+    validate(control: FormGroup): {[key: string]: any} | null {
+        let password = control.controls['password'];
+        let repeatPassword = control.controls['repeat_password'];
+        if (password && repeatPassword) {
+            console.log("check password ", password.value, repeatPassword.value);
+            return password.value !== repeatPassword.value ? ({ 'checkPassword': true }) : null;
+        } else {
+            console.log("ERROR:  CheckPasswordValidatorDirective: At least one component not found ");
+            return null;
+        }
+    }
+  }

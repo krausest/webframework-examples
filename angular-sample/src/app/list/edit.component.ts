@@ -1,5 +1,5 @@
 
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { StoreService } from '../store';
 import { IComboBoxValue } from '../types';
 import { Routes, RouterModule, Router, ActivatedRoute } from '@angular/router';
@@ -8,7 +8,7 @@ import * as MyValidators from '../validators';
 
 @Component({
     selector: 'app-list-edit',
-    templateUrl: './edit.component.html',
+    templateUrl: './edit.component.html'
 })
 export class ListEditComponent {
 

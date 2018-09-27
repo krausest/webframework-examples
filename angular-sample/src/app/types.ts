@@ -11,6 +11,7 @@ export interface IProfileData {
     email: string;
     allowPhone: boolean;
     phone: string;
+    password: string;
 }
 
 export interface IColumnSelection {

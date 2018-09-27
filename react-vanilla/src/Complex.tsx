@@ -22,15 +22,15 @@ class SelectionData {
 }
 
 class ColumnData {
-    public selections: Array<SelectionData>;
-    constructor(selectionData: ISelectionData = undefined) {
+    public selections: SelectionData[];
+    constructor(selectionData: ISelectionData) {
         this.selections = selectionData ? selectionData.selections.map(sd => new SelectionData(sd)) : [];
     }
 }
 
 class PageData {
-    public columns: Array<ColumnData>;
-    constructor(columns: ISelectionData[] = undefined) {
+    public columns: ColumnData[];
+    constructor(columns: ISelectionData[]) {
         this.columns = columns ? columns.map(c => new ColumnData(c)) : [];
     }
 }
@@ -65,7 +65,7 @@ interface ISelectionProps {
 }
 
 class Selection extends React.Component<ISelectionProps> {
-    render() {
+    public render() {
         return (<div className="card-body">
                     <div className="row">
                         <div className="col-3">
@@ -80,7 +80,7 @@ class Selection extends React.Component<ISelectionProps> {
                         </div>
                         <div className="col-4">
                             <input type="text"  autoComplete="off" className={this.props.selection.amount.invalid ? 'is-invalid form-control' : 'form-control'}
-                                value={this.props.selection.amount.value} onChange={this.props.handler(this.props.selection.amount, false)} onBlur={(evt) => {this.props.handler(this.props.selection.amount, true, true)(evt); this.props.updatePrice(this.props.selection);}}
+                                value={this.props.selection.amount.value} onChange={this.props.handler(this.props.selection.amount, false, false)} onBlur={(evt) => {this.props.handler(this.props.selection.amount, true, true)(evt); this.props.updatePrice(this.props.selection);}}
                                 placeholder="Enter amount"/>
                             {this.props.selection.amount.invalid
                                 && <div className="invalid-feedback">{this.props.selection.amount.error}</div>}
@@ -100,13 +100,7 @@ class Column extends React.Component<{column: ColumnData, handler: THandler, com
     remove: (columnData: ColumnData, selectionData: SelectionData) => void,
     updatePrice: (columnData: ColumnData, selectionData: SelectionData) => void,
         add: (columnData: ColumnData) => void}> {
-    remove = (selectionData: SelectionData) => {
-        this.props.remove(this.props.column, selectionData);
-    }
-    updatePrice = (selectionData: SelectionData) => {
-        this.props.updatePrice(this.props.column, selectionData);
-    }
-    render() {
+    public render() {
         return (<div className="col-4">
             <div className="card">
                 {
@@ -124,44 +118,52 @@ class Column extends React.Component<{column: ColumnData, handler: THandler, com
 
         </div>);
     }
+    private remove = (selectionData: SelectionData) => {
+        this.props.remove(this.props.column, selectionData);
+    }
+    private updatePrice = (selectionData: SelectionData) => {
+        this.props.updatePrice(this.props.column, selectionData);
+    }
 }
 
 class Complex extends React.Component<ICompProps, ICompState> {
     public state: ICompState;
+    private handleInput = handleFormInput(this, 'form', validate);
+    private propsInput = propsInputValidateOnBlur(this.handleInput);
 
     constructor(props: ICompProps) {
       super(props);
       this.state = {form: new PageData(props.complex)};
     }
 
-    handleInput = handleFormInput(this, 'form', validate);
-    propsInput = propsInputValidateOnBlur(this.handleInput);
-
     public save = (evt: React.SyntheticEvent) => {
         evt.preventDefault();
     }
 
     public updatePrice = (columnData: ColumnData, selectionData: SelectionData) => {
-        console.log("updatePrice", selectionData.amount.error);
-        if (selectionData.amount.error || selectionData.selected.error) return;
-        let inp = selectionData.amount.value;
-        let sel = selectionData.selected.value === 'A' ? 2 : 1;
-        window.setTimeout(() => {
-            selectionData.price = (Number(inp) * 5 * sel).toFixed();
-            this.setState({form: this.state.form});
-        }, 3000);
+        console.log("updatePrice");
+        if (!selectionData.amount.error && !selectionData.selected.error) {
+            let inp = selectionData.amount.value;
+            let sel = selectionData.selected.value === 'A' ? 2 : 1;
+            window.setTimeout(() => {
+                selectionData.price = (Number(inp) * 5 * sel).toFixed();
+                this.setState({form: this.state.form});
+            }, 3000);
+        }
     }
 
     public remove = (columnData: ColumnData, selectionData: SelectionData) => {
         let idx = columnData.selections.indexOf(selectionData);
-        if (idx>=0) columnData.selections.splice(idx, 1);
-        console.log('remove', columnData, this.state.form);
-        this.setState({form: this.state.form});
+        if (idx>=0) {
+            columnData.selections.splice(idx, 1);
+            console.log('remove', columnData, this.state.form);
+            this.setState({form: this.state.form});
+        }
     }
 
     public add = (columnData: ColumnData) => {
         let selected = allowedSelections(this.props.comboBoxValues, columnData, undefined)[0].value;
-        columnData.selections.push(new SelectionData({selected: selected, price: null, amount: 15}));
+        columnData.selections.push(new SelectionData({selected, price: null, amount: 15}));
         this.setState({form: this.state.form});
     }
 

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import './App.css';
-import {FormValueString, FormValueBoolean, alwaysTrue, required, minLength, maxLength, pattern, email as validateEmail, composeValidators, handleFormInput, handleFormCheckbox, validateFormValue, propsInputValidateOnBlur} from './validators';
+import {FormValueString, FormValueBoolean, alwaysTrue, required, minLength, maxLength, pattern, email as validateEmail, composeValidators, handleFormInput, handleFormCheckbox, validateFormValue, propsInputValidateOnBlur, THandleForm} from './validators';
 import {IProfileData, IState, Sex} from './types';
 import { connect } from 'react-redux';
 import { profileSave } from './actions';
@@ -75,34 +75,45 @@ interface ICompState {
     form: PageData;
 }
 
-class NameComponent extends React.PureComponent<any> {
-    render() {
-        // console.log("render name", this.props);
-        return (<div className="form-group">
-        <label htmlFor="name">Name</label>
-        <input type="text" className={(this.props.formValue.invalid ? 'is-invalid' : '') + ' form-control'}
-                value={this.props.formValue.value} onChange={this.props.handleEvents(this.props.formValue, false)} onBlur={this.props.handleEvents(this.props.formValue, true, true)}
-            name="name" placeholder="Enter name" disabled={this.props.readonly}/>
-        {this.props.formValue.invalid && <div className="invalid-feedback">{this.props.formValue.error}</div>}
-    </div>);
-    }
+interface IPropsSubComponent<T> {
+    formValue: T extends string ? FormValueString : FormValueBoolean;
+    handleEvents: THandleForm;
+    readonly: boolean;
 }
 
-class EMailComponent extends React.PureComponent<any> {
-    render() {
+/* Use fully typed props. Can handle text input and boolean input (checkboxes) */
+class EMailComponent extends React.Component<IPropsSubComponent<string>> {
+    public render() {
         // console.log("render email", this.props);
         return (<div className="form-group">
             <label htmlFor="email">E-mail</label>
             <input type="text" className={(this.props.formValue.invalid && this.props.formValue.touched ? 'is-invalid' : '') + ' form-control'}
-                value={this.props.formValue.value} onChange={this.props.handleEvents(this.props.formValue, false)} onBlur={this.props.handleEvents(this.props.formValue, true, true)}
+                value={this.props.formValue.value} onChange={this.props.handleEvents(this.props.formValue, false, false)} onBlur={this.props.handleEvents(this.props.formValue, true, true)}
                 name="email" placeholder="Enter e-mail" disabled={this.props.readonly}/>
             {this.props.formValue.invalid && <div className="invalid-feedback">{this.props.formValue.error}</div>}
         </div>);
     }
 }
 
+class AllowPhoneComponent extends React.PureComponent<IPropsSubComponent<boolean>> {
+    public render() {
+        // console.log("render allow phone", this.props);
+        return (
+            <div className="form-check">
+                <input className="form-check-input" name="allowPhone" id="allowPhone" type="checkbox"
+                    checked={this.props.formValue.value}
+                    onChange={this.props.handleEvents(this.props.formValue, true, true)}
+                    disabled={this.props.readonly}/>
+                <label className="form-check-label" htmlFor="allowPhone">
+                    Allow phone calls
+                </label>
+            </div>)
+    }
+}
+
+/* Use sloppy typed props */
 class SexComponent extends React.PureComponent<any> {
-    render() {
+    public render() {
         // console.log("render sex", this.props);
         return (
             <div className="form-group">
@@ -129,24 +140,8 @@ class SexComponent extends React.PureComponent<any> {
     }
 }
 
-class AllowPhoneComponent extends React.PureComponent<any> {
-    render() {
-        // console.log("render allow phone", this.props);
-        return (
-            <div className="form-check">
-                <input className="form-check-input" name="allowPhone" id="allowPhone" type="checkbox"
-                    checked={this.props.formValue.value}
-                    onChange={this.props.handleEvents(this.props.formValue, true)}
-                    disabled={this.props.readonly}/>
-                <label className="form-check-label" htmlFor="allowPhone">
-                    Allow phone calls
-                </label>
-            </div>)
-    }
-}
-
 class PhoneComponent extends React.PureComponent<any> {
-    render() {
+    public render() {
         // console.log("render phone", this.props);
         return (
             <div className="form-group">
@@ -160,7 +155,7 @@ class PhoneComponent extends React.PureComponent<any> {
 }
 
 class PasswordComponent extends React.PureComponent<any> {
-    render() {
+    public render() {
         // console.log("render password", this.props);
         return (
             <div className="form-group">
@@ -175,7 +170,7 @@ class PasswordComponent extends React.PureComponent<any> {
 }
 
 class RepeatPasswordComponent extends React.PureComponent<any> {
-    render() {
+    public render() {
         // console.log("render repeat password", this.props);
         return (
             <div className="form-group">
@@ -192,18 +187,17 @@ class RepeatPasswordComponent extends React.PureComponent<any> {
 class Profile extends React.Component<ICompProps, ICompState>
 {
     public state: ICompState;
+    private handleInput: THandleForm = handleFormInput(this, 'form', validate);
+    private handleCheckbox: THandleForm = handleFormCheckbox(this, 'form', validate);
+    private propsInput = propsInputValidateOnBlur(this.handleInput);
 
     constructor(props: ICompProps) {
       super(props);
-      this.state = { form: new PageData(props.profile) };
+      this.state = { form: new PageData(props.profile)};
       validate(this.state.form);
     }
 
-    handleInput = handleFormInput(this, 'form', validate);
-    handleCheckbox = handleFormCheckbox(this, 'form', validate);
-    propsInput = propsInputValidateOnBlur(this.handleInput);
-
-    submit = (evt: React.SyntheticEvent) => {
+    public submit = (evt: React.SyntheticEvent) => {
         console.log("submit", this);
         evt.preventDefault();
         if (!this.state.form.invalid) {
@@ -218,8 +212,7 @@ class Profile extends React.Component<ICompProps, ICompState>
         }
     }
 
-    render() {
-
+    public render() {
         return (<div className="row justify-content-center m-4">
                 <div className="col-8">
                     {this.state.form.message && <div className="alert alert-success" role="alert">
@@ -229,16 +222,64 @@ class Profile extends React.Component<ICompProps, ICompState>
                         <div className="card-body">
                             <h5 className="card-title">Profile</h5>
                             <form onSubmit={this.submit}>
-                            {/* <div className="form-group">
+
+                            {/* First possible implementation:
+                            Put field handling inside the component and handle all events manually
+                                Access the FormValue with .value, .touched, .error or .invalid.
+                                Update the values in the event handlers manually, perform validation when needed
+                                and cause a rerender.
+                                 */}
+                            <div className="form-group">
                                     <label htmlFor="name">Name</label>
-                                    <input type="text" className={(p.profile.name.invalid ? 'is-invalid' : '') + ' form-control'}
-                                        // value={p.profile.name.value} onChange={handle(p.profile.name, false)} onBlur={handle(p.profile.name, true, true)}
-                                        {...this.propsInput(p.profile.name)}
-                                        name="name" placeholder="Enter name" disabled={p.readonly}/>
-                                    {p.profile.name.invalid && <div className="invalid-feedback">{p.profile.name.error}</div>}
-                                </div> */}
-                                <NameComponent formValue={this.state.form.profile.name} handleEvents={this.handleInput} readonly={this.state.form.readonly} {...this.state.form.profile.name}/>
-                                <EMailComponent formValue={this.state.form.profile.email} handleEvents={this.handleInput} readonly={this.state.form.readonly} {...this.state.form.profile.email}/>
+                                    <input type="text" className={(this.state.form.profile.name.invalid ? 'is-invalid' : '') + ' form-control'}
+                                        value={this.state.form.profile.name.value}
+                                        onChange={(evt) => {
+                                            // update the FormValue
+                                            this.state.form.profile.name.value = evt.target.value;
+                                            // force repaint
+                                            this.setState({form: this.state.form});
+                                        }}
+                                        onBlur={(evt) => {
+                                            // update the FormValue. Maybe helpful for autocomplete scenarios
+                                            this.state.form.profile.name.value = evt.target.value;
+                                            this.state.form.profile.name.touched = true;
+                                            validate(this.state.form);
+                                            // force repaint
+                                            this.setState({form: this.state.form});
+                                        }}
+                                        // *** Instead of handling the events manually one can use the handleFormInput and handleFormCheckbox
+                                        // *** methods from validators.ts which are curried functions
+                                        // onChange={(evt) => handleFormInput(this,'form',validate)(this.state.form.profile.name, false, false)(evt)}
+                                        // onBlur={(evt) => handleFormInput(this,'form',validate)(this.state.form.profile.name, true, true)(evt)}
+                                        // *** The first curried invocation is constant. Thus is makes sense to
+                                        // *** store handleFormInput(this,'form',validate) in a member: private handleInput = handleFormInput(this, 'form', validate);
+                                        // onChange={this.handleInput(this.state.form.profile.name, false, false)}
+                                        // onBlur={this.handleInput(this.state.form.profile.name, true, true)}
+                                        // *** As an even more comfortable solution you can use the spread operator to
+                                        // *** add a value, onChange and onBlur handler by passing the FormValue to propsInputValidateOnBlur
+                                        // {...this.propsInput(this.state.form.profile.name)}
+                                        // *** there's not much room left to make it even shorter
+                                        name="name" placeholder="Enter name" disabled={this.state.form.readonly}/>
+                                    {this.state.form.profile.name.invalid && <div className="invalid-feedback">{this.state.form.profile.name.error}</div>}
+                                </div>
+                                {/*
+                                    *** Second Option: You can extract the form input into a React.Component
+                                    *** In this case it's important that you don't use a PureComponent.
+                                    *** It would skip re-rendering when the FormValue changes but the reference stays.
+                                    *** It's the price for having a mutable FormValue.
+                                    *** The FormValue and event handlers and other props are passed to the child component.
+                                */}
+                                <EMailComponent formValue={this.state.form.profile.email} handleEvents={this.handleInput}
+                                                readonly={this.state.form.readonly}/>
+                                {/*
+                                    *** If you need or want to use PureComponents this is also possible but requires
+                                    *** a bit more work.
+                                    *** The compoenent must be rerendered when the contents of the FormValue changes.
+                                    *** The simplest way to force a repaint is to pass the FormValue members as props.
+                                    *** These props are ignored by the component, but used in the shouldComponentUpdate
+                                    *** method. This now returns true whenever the contents of the FormValue change.
+                                    *** Note that this might get compplicated for nested sub components.
+                                */}
                                 <SexComponent formValue={this.state.form.profile.sex} handleEvents={this.handleInput} readonly={this.state.form.readonly} {...this.state.form.profile.sex}/>
                                 <AllowPhoneComponent formValue={this.state.form.profile.allowPhone} handleEvents={this.handleCheckbox} readonly={this.state.form.readonly} {...this.state.form.profile.allowPhone}/>
                                 <PhoneComponent formValue={this.state.form.profile.phone} handleEvents={this.handleInput} readonly={this.state.form.readonly} {...this.state.form.profile.phone}/>

@@ -16,6 +16,7 @@ function copy(val) {
 export class ProfileComponent {
     message = '';
     profile: IProfileData;
+    repeatPassword = '';
 
     constructor(private store: StoreService, private router: Router) {
         this.profile =  copy(store.profile);

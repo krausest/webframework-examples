@@ -7,13 +7,13 @@ import {IComboBoxValue, IState} from '../types';
 import {listItemSave, flashMessageSet} from '../actions';
 
 class PageData {
-    label = new FormValueString();
-    value = new FormValueString();
-    minValue = new FormValueString();
-    maxValue = new FormValueString();
-    step = new FormValueString();
-    message = '';
-    invalid = false;
+    public  label = new FormValueString();
+    public  value = new FormValueString();
+    public  minValue = new FormValueString();
+    public  maxValue = new FormValueString();
+    public  step = new FormValueString();
+    public  message = '';
+    public  invalid = false;
 
     constructor(item: IComboBoxValue) {
         if (item) {
@@ -67,16 +67,15 @@ interface ICompState {
 
 class ListEdit extends React.Component<ICompProps, ICompState> {
     public state: ICompState;
+    private handleInput = handleFormInput(this, 'item', validate);
+    private propsInput = propsInputValidateOnBlur(this.handleInput);
+    private handleCheckbox = handleFormCheckbox(this, 'item', validate);
 
     constructor(props: ICompProps) {
       super(props);
       this.state = { item: new PageData(props.item)};
       validate(this.state.item);
     }
-
-    handleInput = handleFormInput(this, 'item', validate);
-    propsInput = propsInputValidateOnBlur(this.handleInput);
-    handleCheckbox = handleFormCheckbox(this, 'item', validate);
 
     public cancel = (evt: React.SyntheticEvent) => {
         evt.preventDefault();

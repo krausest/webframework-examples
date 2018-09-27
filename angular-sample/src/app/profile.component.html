@@ -7,7 +7,7 @@
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">Profile</h5>
-                    <form #profileForm="ngForm" novalidate>
+                    <form #profileForm="ngForm" novalidate checkPassword>
                         <div class="form-group">
                             <label for="name">Name</label>
                             <input type="text" [ngClass]="{'is-invalid' : name.dirty && name.invalid}" class='form-control' name="name"  [(ngModel)]="profile.name" #name="ngModel" placeholder="Enter name"
@@ -34,9 +34,21 @@
                                 required minlength="3" maxlength="14"/>
                             <div *ngIf="phone.dirty && phone.invalid" class="invalid-feedback">Please enter a valid phone number</div>
                         </div>
+                        <div *ngIf="password.touched && repeatPasswordComp.touched && profileForm.errors?.checkPassword" class="alert alert-danger" role="alert">Passwords must be equals</div>
+                        <div class="form-group">
+                            <label for="name">Passwort</label>
+                            <input type="text" [ngClass]="{'is-invalid' : password.touched && password.invalid}" class='form-control' name="password"  [(ngModel)]="profile.password" #password="ngModel" placeholder="Enter password"
+                                required minlength="4" myMaxLength="13" novalidate/>
+                            <div *ngIf="password.touched && password.invalid" class="invalid-feedback">Please enter a password with 4 to 13 characters</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="name">Repeat password</label>
+                            <input type="password" [ngClass]="{'is-invalid' : repeatPasswordComp.touched && repeatPasswordComp.invalid}" class='form-control' name="repeat_password"  [(ngModel)]="repeatPassword" #repeatPasswordComp="ngModel" placeholder="Repeat password"
+                                required minlength="4" myMaxLength="13" novalidate/>
+                            <div *ngIf="repeatPasswordComp.touched && repeatPasswordComp.invalid" class="invalid-feedback">Please enter a name with 4 to 13 characters</div>
+                        </div>
                         <div>
-                            name:{{profile | json}}
-                            t: {{name.touched}} d: {{name.dirty}} v: {{name.valid}}
+                            t: {{password.touched}} d: {{password.dirty}} v: {{password.valid}}
                         </div>
                         <div class="mt-2">
                             <button type="button" class="btn btn-primary" (click)="save()" [disabled]="!profileForm.dirty || profileForm.invalid">Save</button>

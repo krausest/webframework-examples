@@ -32,6 +32,7 @@ import * as Validators from './validators';
     Validators.MinLessThanMaxValidatorDirective,
     Validators.MyMaxValidatorDirective,
     Validators.MyMinValidatorDirective,
+    Validators.CheckPasswordValidatorDirective,
 
   ],
   imports: [
