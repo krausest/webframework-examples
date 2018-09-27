@@ -11,6 +11,7 @@ class PageData {
         name: new FormValueString(),
         email: new FormValueString(),
         sex: new FormValueString(),
+        civilStatus: new FormValueString(),
         allowPhone: new FormValueBoolean(),
         phone: new FormValueString(),
         password: new FormValueString(),
@@ -25,6 +26,7 @@ class PageData {
             this.profile.name = new FormValueString(profile.name);
             this.profile.email = new FormValueString(profile.email);
             this.profile.sex = new FormValueString(profile.sex.toString());
+            this.profile.civilStatus = new FormValueString(profile.civilStatus);
             this.profile.allowPhone = new FormValueBoolean(profile.allowPhone);
             this.profile.phone = new FormValueString(profile.phone);
             this.profile.password = new FormValueString(profile.password);
@@ -47,6 +49,8 @@ const validatePassword = composeValidators(required('Please enter a password'),
                                             minLength(4)('Please enter a password with min 4 characters'),
                                             maxLength(14)('Please enter a password with max 13 characters'));
 
+const validateCivilStatus = required('Please enter your civil status');
+
 const validatePhone = (allowPhone:boolean) => (!allowPhone ? alwaysTrue : validatePhonenumber);
 
 const validateRepeatPassword = (password:string) => (value: string) => password !== value ? 'Passwords must match' : undefined;
@@ -55,6 +59,7 @@ const validate = (values: PageData) => {
     console.log("validate");
     validateFormValue(values.profile.name, validateName);
     validateFormValue(values.profile.email, validateEMail);
+    validateFormValue(values.profile.civilStatus, validateCivilStatus);
     validateFormValue(values.profile.phone, validatePhone(values.profile.allowPhone.value));
     validateFormValue(values.profile.password, validatePassword);
     validateFormValue(values.repeatPassword, validateRepeatPassword(values.profile.password.value));
@@ -90,6 +95,26 @@ class EMailComponent extends React.Component<IPropsSubComponent<string>> {
             <input type="text" className={(this.props.formValue.invalid && this.props.formValue.touched ? 'is-invalid' : '') + ' form-control'}
                 value={this.props.formValue.value} onChange={this.props.handleEvents(this.props.formValue, false, false)} onBlur={this.props.handleEvents(this.props.formValue, true, true)}
                 name="email" placeholder="Enter e-mail" disabled={this.props.readonly}/>
+            {this.props.formValue.invalid && <div className="invalid-feedback">{this.props.formValue.error}</div>}
+        </div>);
+    }
+}
+
+class CivilStatusComponent extends React.Component<IPropsSubComponent<string>> {
+    public render() {
+        return (<div className="form-group">
+            <label htmlFor="email">Civil status</label>
+            <select className={(this.props.formValue.invalid && this.props.formValue.touched ? 'is-invalid' : '') + ' form-control'}
+            value={this.props.formValue.value}
+            onChange={this.props.handleEvents(this.props.formValue, true, true)}
+            onBlur={this.props.handleEvents(this.props.formValue, true, true)}
+            disabled={this.props.readonly}>
+                <option value="">don't know</option>
+                <option value="single">single</option>
+                <option value="married">married</option>
+                <option value="divorced">divorced</option>
+                <option value="widowed">widowed</option>
+            </select>
             {this.props.formValue.invalid && <div className="invalid-feedback">{this.props.formValue.error}</div>}
         </div>);
     }
@@ -205,6 +230,7 @@ class Profile extends React.Component<ICompProps, ICompState>
                 name: this.state.form.profile.name.value,
                 email: this.state.form.profile.email.value,
                 sex: Number(this.state.form.profile.sex.value),
+                civilStatus: this.state.form.profile.civilStatus.value,
                 allowPhone: this.state.form.profile.allowPhone.value,
                 phone: this.state.form.profile.phone.value,
                 password: this.state.form.profile.password.value
@@ -281,11 +307,15 @@ class Profile extends React.Component<ICompProps, ICompState>
                                     *** Note that this might get compplicated for nested sub components.
                                 */}
                                 <SexComponent formValue={this.state.form.profile.sex} handleEvents={this.handleInput} readonly={this.state.form.readonly} {...this.state.form.profile.sex}/>
+                                <CivilStatusComponent formValue={this.state.form.profile.civilStatus} handleEvents={this.handleInput} readonly={this.state.form.readonly}/>
                                 <AllowPhoneComponent formValue={this.state.form.profile.allowPhone} handleEvents={this.handleCheckbox} readonly={this.state.form.readonly} {...this.state.form.profile.allowPhone}/>
                                 <PhoneComponent formValue={this.state.form.profile.phone} handleEvents={this.handleInput} readonly={this.state.form.readonly} {...this.state.form.profile.phone}/>
                                 <PasswordComponent formValue={this.state.form.profile.password} handleEvents={this.handleInput} readonly={this.state.form.readonly} {...this.state.form.profile.password}/>
                                 <RepeatPasswordComponent formValue={this.state.form.repeatPassword} handleEvents={this.handleInput} readonly={this.state.form.readonly} {...this.state.form.repeatPassword}/>
-                                values: {JSON.stringify(this.state)}
+                                <h5>Form state for debugging:</h5>
+                                <pre style={{whiteSpace: "pre-wrap"}}>
+                                {JSON.stringify(this.state)}
+                                </pre>
                                 <div className="mt-2">
                                     <button type="submit" className="btn btn-primary" disabled={this.state.form.invalid}>Save</button>
                                     <button type="button" className="ml-3 btn btn-secondary">Cancel</button>

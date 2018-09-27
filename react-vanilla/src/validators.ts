@@ -24,8 +24,7 @@ export const composeValidators = (...validators: IValidator[]) : IValidator => (
  */
 
 abstract class AbstractFormValue<T> {
-    constructor(public value: T,  public error: string|undefined, public touched: boolean) {
-    }
+    constructor(public value: T,  public error: string|undefined, public touched: boolean) {}
     get invalid() { return this.touched && this.error !== undefined;}
 }
 
@@ -48,32 +47,26 @@ function handleValue<P,S, K extends keyof S, T>(that: React.Component<P,S>, form
     if (doValidate) { validate(that.state[formKey]); }
     that.setState(that.state);
 }
+export type THandleForm = (formValue: AbstractFormValue<any>, doUpdateTouch: boolean, doValidate: boolean) => (evt: React.ChangeEvent<any>) => void;
 
-export function handleFormInput<P,S, K extends keyof S>(that: React.Component<P,S>, formKey: K, validate: (a: S[K]) => void) {
+export function handleFormInput<P,S, K extends keyof S>(that: React.Component<P,S>, formKey: K, validate: (a: S[K]) => void): THandleForm {
     return  (formValue: FormValueString, doUpdateTouch: boolean, doValidate: boolean) => (evt: React.ChangeEvent<HTMLInputElement|HTMLSelectElement>) => {
         handleValue(that, formKey, validate, formValue, evt.target.value, doUpdateTouch, doValidate);
     }
 }
 
-export function handleFormCheckbox<P,S, K extends keyof S>(that: React.Component<P,S>, formKey: K, validate: (a: S[K]) => void) {
+export function handleFormCheckbox<P,S, K extends keyof S>(that: React.Component<P,S>, formKey: K, validate: (a: S[K]) => void): THandleForm {
     return (formValue: FormValueBoolean, doUpdateTouch: boolean, doValidate: boolean) => (evt: React.ChangeEvent<HTMLInputElement>) => {
         handleValue(that, formKey, validate, formValue, evt.target.checked, doUpdateTouch, doValidate);
     }
 }
 
-export type THandleForm = (formValue: AbstractFormValue<any>, doUpdateTouch: boolean, doValidate: boolean) => (evt: React.ChangeEvent<any>) => void;
-
 export const propsInputValidateOnBlur = (handle: ReturnType<typeof handleFormInput>) => (value: FormValueString) =>
-    ({value: value.value,
-    onChange: handle(value, false, false),
-    onBlur: handle(value, true, true)
+    ({value: value.value, onChange: handle(value, false, false), onBlur: handle(value, true, true)
 })
 
 export const propsInputValidateOnChange = (handle: ReturnType<typeof handleFormInput>) => (value: FormValueString) =>
-    ({value: value.value,
-    onChange: handle(value, true, true)
+    ({value: value.value, onChange: handle(value, true, true)
 })
 
-export const validateFormValue = (formValue: FormValueString, validator: IValidator) => {
-    formValue.error = validator(formValue.value);
-}
+export const validateFormValue = (formValue: FormValueString, validator: IValidator) => { formValue.error = validator(formValue.value);}

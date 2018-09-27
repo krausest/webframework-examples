@@ -10,6 +10,7 @@ const initialProfileState : IProfileData = {
     name: '',
     email: '',
     sex: Sex.FEMALE,
+    civilStatus: '',
     allowPhone: true,
     phone: '',
     password: ''

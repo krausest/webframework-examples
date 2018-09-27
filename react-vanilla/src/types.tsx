@@ -14,6 +14,7 @@ export enum Sex {
 export interface IProfileData {
     name: string;
     sex: Sex;
+    civilStatus: string;
     email: string;
     allowPhone: boolean;
     phone: string;
